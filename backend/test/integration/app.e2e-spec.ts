@@ -2,6 +2,8 @@ import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
+import { DataSource } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 describe('Expense Report — E2E', () => {
   let app: INestApplication;
@@ -15,6 +17,15 @@ describe('Expense Report — E2E', () => {
     app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
     await app.init();
+
+    // Create admin user for tests (idempotent)
+    const dataSource = app.get(DataSource);
+    const userRepo = dataSource.getRepository('users');
+    const adminExists = await userRepo.findOneBy({ email: 'admin@gradion.com' });
+    if (!adminExists) {
+      const hash = await bcrypt.hash('admin1234', 10);
+      await userRepo.save({ email: 'admin@gradion.com', passwordHash: hash, role: 'admin' });
+    }
   });
 
   afterAll(() => app.close());
@@ -35,6 +46,12 @@ describe('Expense Report — E2E', () => {
     expect(userToken).toBeDefined();
   });
 
+  it('GET /reports — returns 401 without token', async () => {
+    await request(app.getHttpServer())
+      .get('/api/v1/reports')
+      .expect(401);
+  });
+
   it('POST /reports — creates DRAFT report', async () => {
     const res = await request(app.getHttpServer())
       .post('/api/v1/reports')
@@ -47,11 +64,14 @@ describe('Expense Report — E2E', () => {
   });
 
   it('POST /reports/:id/items — adds item to DRAFT report', async () => {
-    await request(app.getHttpServer())
+    const res = await request(app.getHttpServer())
       .post(`/api/v1/reports/${reportId}/items`)
       .set('Authorization', `Bearer ${userToken}`)
       .send({ amount: 150.00, category: 'TRAVEL', merchantName: 'Air France' })
       .expect(201);
+    expect(res.body.reportId).toBe(reportId);
+    expect(Number(res.body.amount)).toBe(150);
+    expect(res.body.category).toBe('TRAVEL');
   });
 
   it('GET /reports/:id — totalAmount reflects items', async () => {
@@ -85,6 +105,7 @@ describe('Expense Report — E2E', () => {
       .send({ email: 'admin@gradion.com', password: 'admin1234' })
       .expect(200);
     adminToken = res.body.accessToken;
+    expect(adminToken).toBeDefined();
   });
 
   it('POST /admin/reports/:id/approve — SUBMITTED → APPROVED', async () => {
@@ -102,6 +123,12 @@ describe('Expense Report — E2E', () => {
       .post('/api/v1/reports').set('Authorization', `Bearer ${userToken}`)
       .send({ title: 'Rejection test' }).expect(201);
     const rId = r.body.id;
+
+    await request(app.getHttpServer())
+      .post(`/api/v1/reports/${rId}/items`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ amount: 25.00, category: 'MEALS' })
+      .expect(201);
 
     await request(app.getHttpServer())
       .post(`/api/v1/reports/${rId}/submit`).set('Authorization', `Bearer ${userToken}`).expect(201);
