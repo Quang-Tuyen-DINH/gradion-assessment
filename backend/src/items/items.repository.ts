@@ -23,6 +23,7 @@ export class ItemsRepository {
   }
 
   async delete(id: string, reportId: string): Promise<void> {
+    await this.findOne(id, reportId); // throws NotFoundException if not found
     await this.repo.delete({ id, reportId });
   }
 }

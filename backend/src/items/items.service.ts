@@ -1,4 +1,4 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ItemsRepository } from './items.repository';
 import { ReportsService } from '../reports/reports.service';
 import { ReportStatus } from '../common/enums/report-status.enum';
@@ -24,6 +24,15 @@ export class ItemsService {
 
   async update(reportId: string, itemId: string, userId: string, dto: UpdateItemDto) {
     await this.guardDraft(reportId, userId);
+    if (
+      dto.amount === undefined &&
+      dto.currency === undefined &&
+      dto.category === undefined &&
+      dto.merchantName === undefined &&
+      dto.transactionDate === undefined
+    ) {
+      throw new BadRequestException('At least one field must be provided');
+    }
     const item = await this.repo.findOne(itemId, reportId);
     Object.assign(item, dto);
     return this.repo.save(item);
