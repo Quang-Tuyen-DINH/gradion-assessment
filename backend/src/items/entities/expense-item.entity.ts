@@ -31,7 +31,7 @@ export class ExpenseItem {
   @Column({ type: 'enum', enum: ExpenseCategory, nullable: true })
   category: ExpenseCategory | null;
 
-  @Column({ name: 'merchant_name', length: 255, nullable: true })
+  @Column({ name: 'merchant_name', type: 'varchar', length: 255, nullable: true })
   merchantName: string | null;
 
   @Column({ name: 'transaction_date', type: 'date', nullable: true })
