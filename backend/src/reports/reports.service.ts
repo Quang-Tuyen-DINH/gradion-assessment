@@ -76,6 +76,10 @@ export class ReportsService {
     await this.repo.delete(id);
   }
 
+  async findAndCheckOwnerRaw(id: string, userId: string): Promise<Report> {
+    return this.findAndCheckOwner(id, userId);
+  }
+
   async submit(id: string, userId: string) {
     const report = await this.findAndCheckOwner(id, userId);
     if (report.status !== ReportStatus.DRAFT) {
