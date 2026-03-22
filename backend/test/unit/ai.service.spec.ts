@@ -1,3 +1,4 @@
+import { InternalServerErrorException } from '@nestjs/common';
 import { AiService } from '../../src/ai/ai.service';
 
 const mockAnthropicCreate = jest.fn();
@@ -39,5 +40,10 @@ describe('AiService', () => {
     const calledWith = mockAnthropicCreate.mock.calls[0][0].messages[0].content as string;
     // The prompt must not contain more than 200 consecutive A's
     expect(calledWith).not.toContain('A'.repeat(201));
+  });
+
+  it('throws InternalServerErrorException when Anthropic API fails', async () => {
+    mockAnthropicCreate.mockRejectedValue(new Error('Network error'));
+    await expect(service.suggestCategory('Test Merchant')).rejects.toThrow(InternalServerErrorException);
   });
 });
