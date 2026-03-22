@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, UnprocessableEntityException, BadRequestException } from '@nestjs/common';
 import { ReportsRepository } from './reports.repository';
 import { ReportStatus } from '../common/enums/report-status.enum';
 import { CreateReportDto } from './dto/create-report.dto';
@@ -59,6 +59,9 @@ export class ReportsService {
     const report = await this.findAndCheckOwner(id, userId);
     if (report.status !== ReportStatus.DRAFT) {
       throw new UnprocessableEntityException(`Cannot edit a report with status ${report.status}`);
+    }
+    if (dto.title === undefined && dto.description === undefined) {
+      throw new BadRequestException('At least one field (title or description) must be provided');
     }
     Object.assign(report, dto);
     const saved = await this.repo.save(report);

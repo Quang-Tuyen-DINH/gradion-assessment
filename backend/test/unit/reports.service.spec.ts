@@ -29,14 +29,14 @@ describe('ReportsService — state machine', () => {
   });
 
   it('SUBMITTED → APPROVED on approve()', async () => {
-    mockRepo.findOneWithItems.mockResolvedValue({ id: '1', userId, status: ReportStatus.SUBMITTED });
+    mockRepo.findOneWithItems.mockResolvedValue({ id: '1', userId, status: ReportStatus.SUBMITTED, items: [] });
     mockRepo.save.mockImplementation((r) => Promise.resolve(r));
     const result = await service.approve('1');
     expect(result.status).toBe(ReportStatus.APPROVED);
   });
 
   it('SUBMITTED → REJECTED on reject()', async () => {
-    mockRepo.findOneWithItems.mockResolvedValue({ id: '1', userId, status: ReportStatus.SUBMITTED });
+    mockRepo.findOneWithItems.mockResolvedValue({ id: '1', userId, status: ReportStatus.SUBMITTED, items: [] });
     mockRepo.save.mockImplementation((r) => Promise.resolve(r));
     const result = await service.reject('1');
     expect(result.status).toBe(ReportStatus.REJECTED);
@@ -56,12 +56,12 @@ describe('ReportsService — state machine', () => {
   });
 
   it('throws 422 when approving non-SUBMITTED report', async () => {
-    mockRepo.findOneWithItems.mockResolvedValue({ id: '1', userId, status: ReportStatus.DRAFT });
+    mockRepo.findOneWithItems.mockResolvedValue({ id: '1', userId, status: ReportStatus.DRAFT, items: [] });
     await expect(service.approve('1')).rejects.toThrow(UnprocessableEntityException);
   });
 
   it('throws 422 when rejecting non-SUBMITTED report', async () => {
-    mockRepo.findOneWithItems.mockResolvedValue({ id: '1', userId, status: ReportStatus.APPROVED });
+    mockRepo.findOneWithItems.mockResolvedValue({ id: '1', userId, status: ReportStatus.APPROVED, items: [] });
     await expect(service.reject('1')).rejects.toThrow(UnprocessableEntityException);
   });
 
