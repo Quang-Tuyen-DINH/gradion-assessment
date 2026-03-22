@@ -9,7 +9,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 @UseGuards(JwtAuthGuard)
 @Controller('reports')
 export class ReportsController {
-  constructor(private service: ReportsService) {}
+  constructor(private readonly service: ReportsService) {}
 
   @Get()
   findAll(@CurrentUser('id') userId: string, @Query() q: FilterReportsDto) {
@@ -17,6 +17,7 @@ export class ReportsController {
   }
 
   @Post()
+  @HttpCode(201)
   create(@CurrentUser('id') userId: string, @Body() dto: CreateReportDto) {
     return this.service.create(userId, dto);
   }
