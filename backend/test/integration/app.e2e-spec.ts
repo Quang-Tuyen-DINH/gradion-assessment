@@ -109,9 +109,10 @@ describe('Expense Report — E2E', () => {
     await request(app.getHttpServer())
       .post(`/api/v1/admin/reports/${rId}/reject`).set('Authorization', `Bearer ${adminToken}`).expect(201);
 
-    await request(app.getHttpServer())
+    const drafted = await request(app.getHttpServer())
       .post(`/api/v1/reports/${rId}/return-to-draft`).set('Authorization', `Bearer ${userToken}`)
-      .expect(res => expect(res.body.status).toBe('DRAFT'));
+      .expect(201);
+    expect(drafted.body.status).toBe('DRAFT');
 
     await request(app.getHttpServer())
       .post(`/api/v1/reports/${rId}/submit`).set('Authorization', `Bearer ${userToken}`).expect(201);
