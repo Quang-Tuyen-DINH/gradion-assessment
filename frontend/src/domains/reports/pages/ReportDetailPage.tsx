@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getReport, submitReport, returnToDraft, deleteReport } from '../api/reports';
 import { createItem, updateItem, deleteItem } from '../../items/api/items';
@@ -15,15 +15,15 @@ export function ReportDetailPage() {
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
 
-  const reload = () => {
+  const reload = useCallback(() => {
     setLoading(true);
     getReport(id!)
       .then(setReport)
       .catch(() => setError('Failed to load report'))
       .finally(() => setLoading(false));
-  };
+  }, [id]);
 
-  useEffect(() => { reload(); }, [id]);
+  useEffect(() => { reload(); }, [reload]);
 
   if (loading) return <LoadingSpinner />;
   if (error || !report) return <p style={{ color: 'red' }}>{error || 'Report not found'}</p>;

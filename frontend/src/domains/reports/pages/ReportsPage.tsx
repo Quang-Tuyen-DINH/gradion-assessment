@@ -14,8 +14,12 @@ export function ReportsPage() {
   const handleCreate = async () => {
     const title = prompt('Report title:');
     if (!title?.trim()) return;
-    const report = await createReport(title.trim());
-    navigate(`/reports/${report.id}`);
+    try {
+      const report = await createReport(title.trim());
+      navigate(`/reports/${report.id}`);
+    } catch {
+      alert('Failed to create report. Please try again.');
+    }
   };
 
   if (loading) return <LoadingSpinner />;
