@@ -5,6 +5,7 @@ dotenv.config();
 export default new DataSource({
   type: 'postgres',
   url: process.env.DATABASE_URL,
-  entities: ['src/**/*.entity.ts'],
-  migrations: ['migrations/*.ts'],
+  synchronize: false,
+  entities: ['src/**/*.entity.ts', 'dist/**/*.entity.js'],
+  migrations: ['migrations/*.ts', 'migrations/*.js'],
 });
