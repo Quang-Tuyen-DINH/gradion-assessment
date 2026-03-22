@@ -1,0 +1,2 @@
+export type ReportStatus = 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
+export type ExpenseCategory = 'TRAVEL' | 'MEALS' | 'ACCOMMODATION' | 'TRANSPORTATION' | 'OFFICE_SUPPLIES' | 'ENTERTAINMENT' | 'UTILITIES' | 'OTHER';
