@@ -2,7 +2,7 @@ import { ItemsService } from '../../src/items/items.service';
 import { ItemsRepository } from '../../src/items/items.repository';
 import { ReportsService } from '../../src/reports/reports.service';
 import { ReportStatus } from '../../src/common/enums/report-status.enum';
-import { UnprocessableEntityException } from '@nestjs/common';
+import { UnprocessableEntityException, BadRequestException } from '@nestjs/common';
 
 describe('ItemsService', () => {
   let service: ItemsService;
@@ -38,6 +38,11 @@ describe('ItemsService', () => {
     it('throws 422 when updating item on non-DRAFT report', async () => {
       reportsService.findAndCheckOwnerRaw.mockResolvedValue({ status: ReportStatus.SUBMITTED } as any);
       await expect(service.update('r1', 'i1', 'u1', { amount: 20 })).rejects.toThrow(UnprocessableEntityException);
+    });
+
+    it('throws 400 when update body is empty', async () => {
+      reportsService.findAndCheckOwnerRaw.mockResolvedValue({ status: ReportStatus.DRAFT } as any);
+      await expect(service.update('r1', 'i1', 'u1', {})).rejects.toThrow(BadRequestException);
     });
   });
 
