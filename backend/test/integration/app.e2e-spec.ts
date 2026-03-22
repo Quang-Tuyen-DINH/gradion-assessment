@@ -4,6 +4,7 @@ import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { UserRole } from '../../src/common/enums/user-role.enum';
 
 describe('Expense Report — E2E', () => {
   let app: INestApplication;
@@ -24,7 +25,7 @@ describe('Expense Report — E2E', () => {
     const adminExists = await userRepo.findOneBy({ email: 'admin@gradion.com' });
     if (!adminExists) {
       const hash = await bcrypt.hash('admin1234', 10);
-      await userRepo.save({ email: 'admin@gradion.com', passwordHash: hash, role: 'admin' });
+      await userRepo.save({ email: 'admin@gradion.com', passwordHash: hash, role: UserRole.ADMIN });
     }
   });
 
@@ -53,6 +54,7 @@ describe('Expense Report — E2E', () => {
   });
 
   it('POST /reports — creates DRAFT report', async () => {
+    if (!userToken) throw new Error('userToken not set — check POST /auth/login test');
     const res = await request(app.getHttpServer())
       .post('/api/v1/reports')
       .set('Authorization', `Bearer ${userToken}`)
@@ -64,6 +66,7 @@ describe('Expense Report — E2E', () => {
   });
 
   it('POST /reports/:id/items — adds item to DRAFT report', async () => {
+    if (!reportId) throw new Error('reportId not set — check POST /reports test');
     const res = await request(app.getHttpServer())
       .post(`/api/v1/reports/${reportId}/items`)
       .set('Authorization', `Bearer ${userToken}`)
@@ -109,6 +112,7 @@ describe('Expense Report — E2E', () => {
   });
 
   it('POST /admin/reports/:id/approve — SUBMITTED → APPROVED', async () => {
+    if (!adminToken) throw new Error('adminToken not set — check Admin login test');
     const res = await request(app.getHttpServer())
       .post(`/api/v1/admin/reports/${reportId}/approve`)
       .set('Authorization', `Bearer ${adminToken}`)
@@ -133,8 +137,9 @@ describe('Expense Report — E2E', () => {
     await request(app.getHttpServer())
       .post(`/api/v1/reports/${rId}/submit`).set('Authorization', `Bearer ${userToken}`).expect(201);
 
-    await request(app.getHttpServer())
+    const rejected = await request(app.getHttpServer())
       .post(`/api/v1/admin/reports/${rId}/reject`).set('Authorization', `Bearer ${adminToken}`).expect(201);
+    expect(rejected.body.status).toBe('REJECTED');
 
     const drafted = await request(app.getHttpServer())
       .post(`/api/v1/reports/${rId}/return-to-draft`).set('Authorization', `Bearer ${userToken}`)
