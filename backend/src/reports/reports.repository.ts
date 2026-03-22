@@ -17,7 +17,10 @@ export class ReportsRepository {
   }
 
   findAllByUser(userId: string, status?: ReportStatus): Promise<Report[]> {
-    const qb = this.repo.createQueryBuilder('r').where('r.user_id = :userId', { userId });
+    const qb = this.repo
+      .createQueryBuilder('r')
+      .leftJoinAndSelect('r.items', 'items')
+      .where('r.user_id = :userId', { userId });
     if (status) qb.andWhere('r.status = :status', { status });
     return qb.getMany();
   }

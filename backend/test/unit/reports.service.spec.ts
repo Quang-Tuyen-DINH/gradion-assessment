@@ -5,6 +5,7 @@ import { UnprocessableEntityException, ForbiddenException, NotFoundException } f
 const mockRepo = {
   findOneWithItems: jest.fn(),
   findAllByUser: jest.fn(),
+  findAll: jest.fn(),
   create: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
