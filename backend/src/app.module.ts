@@ -1,6 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { ReportsModule } from './reports/reports.module';
+import { ItemsModule } from './items/items.module';
+import { AdminModule } from './admin/admin.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -13,7 +19,12 @@ import { ConfigModule } from '@nestjs/config';
       migrationsRun: true,
       synchronize: false,
     }),
-    // Feature modules imported in Task 8 Step 7
+    AuthModule,
+    UsersModule,
+    ReportsModule,
+    ItemsModule,
+    AdminModule,
+    AiModule,
   ],
 })
 export class AppModule {}
