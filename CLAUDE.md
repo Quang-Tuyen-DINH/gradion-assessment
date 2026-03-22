@@ -12,3 +12,12 @@ Full-stack Expense Report Management System. Monorepo: /backend (NestJS) + /fron
 
 ## Spec
 docs/superpowers/specs/2026-03-22-expense-report-api-design.md
+
+## Roles
+- UserRole enum: `user` | `admin`
+- Protected endpoints use `@UseGuards(JwtAuthGuard, RolesGuard)` with `@Roles(UserRole.ADMIN)` for admin-only routes
+
+## Seed Admin Credentials
+- email: admin@gradion.com
+- password: admin1234
+- Run: `docker-compose exec backend npm run seed` (idempotent)
