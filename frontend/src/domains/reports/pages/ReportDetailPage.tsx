@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getReport, submitReport, returnToDraft, deleteReport } from '../api/reports';
-import { createItem, updateItem, deleteItem } from '../../items/api/items';
+import { updateItem, deleteItem } from '../../items/api/items';
 import { StatusBadge } from '../../../shared/components/StatusBadge';
 import { LoadingSpinner } from '../../../shared/components/LoadingSpinner';
 import { ItemForm } from '../../items/components/ItemForm';

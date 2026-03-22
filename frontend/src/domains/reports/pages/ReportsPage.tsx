@@ -8,7 +8,7 @@ import type { ReportStatus } from '../../../shared/types';
 
 export function ReportsPage() {
   const [filter, setFilter] = useState<ReportStatus | ''>('');
-  const { reports, loading, error, refetch } = useReports(filter || undefined);
+  const { reports, loading, error } = useReports(filter || undefined);
   const navigate = useNavigate();
 
   const handleCreate = async () => {
