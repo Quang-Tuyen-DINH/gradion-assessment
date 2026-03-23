@@ -20,6 +20,7 @@ export function ReportsPage() {
   const [filter, setFilter] = useState<ReportStatus | undefined>(undefined);
   const { reports: userReports, loading: userLoading, error } = useReports(
     admin ? undefined : filter,
+    refreshKey,
   );
 
   // Admin reports

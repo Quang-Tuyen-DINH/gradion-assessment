@@ -20,7 +20,7 @@ interface Report {
   items?: ReportItem[];
 }
 
-export function useReports(statusFilter?: string) {
+export function useReports(statusFilter?: string, key?: number) {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -31,7 +31,7 @@ export function useReports(statusFilter?: string) {
       .then((d) => setReports(d.data ?? d))
       .catch(() => setError('Failed to load reports'))
       .finally(() => setLoading(false));
-  }, [statusFilter]);
+  }, [statusFilter, key]);
 
   const refetch = useCallback(() => {
     setLoading(true);

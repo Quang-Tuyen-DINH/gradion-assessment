@@ -71,7 +71,7 @@ export function ItemForm({ reportId, onSaved }: Props) {
         <Input.Search
           placeholder="e.g. Uber"
           enterButton={aiLoading ? '...' : 'Suggest'}
-          onSearch={suggest}
+          onSearch={() => suggest()}
           loading={aiLoading}
         />
       </Form.Item>

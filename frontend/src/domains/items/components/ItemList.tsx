@@ -27,7 +27,7 @@ export function ItemList({ items, canEdit, onDelete, onUpdate }: Props) {
 
   const startEdit = (item: Item) => {
     setEditingId(item.id);
-    editForm.setFieldsValue({ amount: item.amount, category: item.category ?? '' });
+    editForm.setFieldsValue({ amount: item.amount, category: item.category ?? undefined });
   };
 
   const saveEdit = async (item: Item) => {
