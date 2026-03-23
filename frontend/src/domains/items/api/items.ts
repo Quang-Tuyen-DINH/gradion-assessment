@@ -2,6 +2,7 @@ import client from '../../../shared/api/client';
 
 export interface CreateItemPayload {
   amount: number;
+  currency?: string;
   category?: string;
   merchantName?: string;
   transactionDate?: string;
