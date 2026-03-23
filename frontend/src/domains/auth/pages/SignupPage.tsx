@@ -1,38 +1,38 @@
-import { useState } from 'react';
+import { Form, Input, Button, Typography, Alert } from 'antd';
 import { Link } from 'react-router-dom';
 import { useSignup } from '../hooks/useSignup';
-import { LoadingSpinner } from '../../../shared/components/LoadingSpinner';
 
 export function SignupPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const { submit, error, loading } = useSignup();
+
+  const onFinish = ({ email, password }: { email: string; password: string }) => {
+    submit(email, password);
+  };
 
   return (
     <div style={{ maxWidth: 400, margin: '80px auto', padding: 24 }}>
-      <h2>Sign Up</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {loading && <LoadingSpinner />}
-      <input
-        placeholder="Email"
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        style={{ display: 'block', width: '100%', marginBottom: 8 }}
-      />
-      <input
-        placeholder="Password (min 8 characters)"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        style={{ display: 'block', width: '100%', marginBottom: 8 }}
-      />
-      <button onClick={() => submit(email, password)} disabled={loading}>
-        Sign Up
-      </button>
-      <p>
+      <Typography.Title level={3}>Sign Up</Typography.Title>
+      {error && <Alert type="error" message={error} style={{ marginBottom: 16 }} />}
+      <Form layout="vertical" onFinish={onFinish}>
+        <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
+          <Input placeholder="you@example.com" />
+        </Form.Item>
+        <Form.Item
+          name="password"
+          label="Password"
+          rules={[{ required: true, min: 8, message: 'Password must be at least 8 characters' }]}
+        >
+          <Input.Password placeholder="Min 8 characters" />
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit" loading={loading} block>
+            Sign Up
+          </Button>
+        </Form.Item>
+      </Form>
+      <Typography.Text>
         <Link to="/login">Already have an account? Login</Link>
-      </p>
+      </Typography.Text>
     </div>
   );
 }
