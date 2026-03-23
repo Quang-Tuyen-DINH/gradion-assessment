@@ -40,7 +40,7 @@ Allowing users to self-assign admin role is a security hole. Admin accounts are 
 
 ## If I Had One More Day
 
-**Frontend tests (Vitest + React Testing Library)** — The backend has 25 unit tests and a full E2E suite, but the frontend has none. I'd add tests for the state machine UI logic: does `ReportDetailPage` show the Submit button only in DRAFT? Does `ItemForm` clear after save? Does `useSuggestCategory` debounce correctly?
+**~~Frontend tests (Vitest + React Testing Library)~~** — Delivered in the polish pass. 12 tests covering auth redirects, role-aware nav, status badge rendering, ItemForm validation, and ReportsPage role-branching.
 
 **Refresh token flow** — The current JWT expires in 7 days and users are silently logged out. A short-lived access token (15 min) + httpOnly refresh token cookie with a `/auth/refresh` endpoint would be significantly more secure without sacrificing UX.
 
@@ -53,3 +53,16 @@ Allowing users to self-assign admin role is a security hole. Admin accounts are 
 **Rate limiting on AI endpoint** — `POST /ai/suggest-category` calls the Anthropic API on every request. A `@nestjs/throttler` guard (e.g., 10 req/min per user) + Redis-backed cache (TTL 1h per merchant name) would cut costs and protect against abuse.
 
 **Role management UI** — Currently admins are created only via the seed script. An admin-only `PATCH /admin/users/:id/role` endpoint + a simple UI would let a super-admin promote users without touching the database directly.
+
+---
+
+## Polish Pass — March 2026
+
+| Decision | Choice | Rationale |
+|---|---|---|
+| Component library | Ant Design | Purpose-built for admin/CRUD UIs; comprehensive TypeScript support; built-in form validation, tables, modals, and layout — reduces bespoke CSS to near zero |
+| Form management | Ant Design `Form` (not `react-hook-form`) | Ant Design's `Form` provides equivalent field state, validation rules, and error display fully integrated with its input components. Adding `react-hook-form` would create two competing form systems with no benefit |
+| Admin routing | Single role-aware `/reports` and `/reports/:id` | Separate `/admin/reports` routes were invisible to admins without knowing the URL. A unified route that branches on role is simpler to navigate and eliminates separate admin pages |
+| Backend admin routes | Kept separate (`/api/v1/admin/reports`) | Frontend unification is a UX decision; backend separation is a security/API design decision. `@Roles(UserRole.ADMIN)` guard on `/admin/*` routes gives explicit, auditable access control with zero ambiguity |
+| `@IsNotFuture()` validator | Custom `registerDecorator` | `class-validator` has no built-in future-date check; a custom decorator keeps the DTO declarative and reusable |
+| Frontend tests | Vitest + React Testing Library | Vitest is the natural choice for Vite projects (shared config, no babel overhead); RTL tests behavior not implementation — 12 focused tests covering auth, role-based rendering, form validation, and component correctness |
