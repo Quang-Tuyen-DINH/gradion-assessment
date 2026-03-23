@@ -7,7 +7,7 @@ import { createReport, deleteReport } from '../api/reports';
 import { getAdminReports } from '../../admin/api/admin';
 import { StatusBadge } from '../../../shared/components/StatusBadge';
 import { isAdmin } from '../../../shared/utils/auth';
-import type { ReportStatus } from '../../../shared/types';
+import type { Report, ReportStatus } from '../../../shared/types';
 
 const { Option } = Select;
 
@@ -24,7 +24,7 @@ export function ReportsPage() {
   );
 
   // Admin reports
-  const [adminReports, setAdminReports] = useState<any[]>([]);
+  const [adminReports, setAdminReports] = useState<Report[]>([]);
   const [adminLoading, setAdminLoading] = useState(false);
   const [adminFilter, setAdminFilter] = useState<ReportStatus | undefined>(undefined);
 
@@ -78,7 +78,7 @@ export function ReportsPage() {
     {
       title: 'Actions',
       key: 'actions',
-      render: (_: unknown, record: any) => (
+      render: (_: unknown, record: Report) => (
         <Space>
           <Button type="link" onClick={() => navigate(`/reports/${record.id}`)}>
             View
@@ -106,7 +106,7 @@ export function ReportsPage() {
     {
       title: 'User',
       key: 'user',
-      render: (_: unknown, record: any) => record.user?.email ?? '—',
+      render: (_: unknown, record: Report) => record.user?.email ?? '—',
     },
     {
       title: 'Status',
@@ -123,7 +123,7 @@ export function ReportsPage() {
     {
       title: 'Actions',
       key: 'actions',
-      render: (_: unknown, record: any) => (
+      render: (_: unknown, record: Report) => (
         <Button type="link" onClick={() => navigate(`/reports/${record.id}`)}>
           View
         </Button>

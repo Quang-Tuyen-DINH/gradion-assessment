@@ -10,13 +10,14 @@ import { LoadingSpinner } from '../../../shared/components/LoadingSpinner';
 import { ItemForm } from '../../items/components/ItemForm';
 import { ItemList } from '../../items/components/ItemList';
 import { isAdmin } from '../../../shared/utils/auth';
+import type { Report } from '../../../shared/types';
 
 export function ReportDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const admin = isAdmin();
 
-  const [report, setReport] = useState<any>(null);
+  const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');

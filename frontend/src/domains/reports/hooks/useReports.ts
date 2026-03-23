@@ -1,24 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { getReports } from '../api/reports';
-import type { ReportStatus, ExpenseCategory } from '../../../shared/types';
-
-interface ReportItem {
-  id: string;
-  amount: number | string;
-  category: ExpenseCategory;
-  merchantName?: string;
-  date: string;
-}
-
-interface Report {
-  id: string;
-  title: string;
-  description?: string;
-  status: ReportStatus;
-  totalAmount: number | string;
-  createdAt: string;
-  items?: ReportItem[];
-}
+import type { Report } from '../../../shared/types';
 
 export function useReports(statusFilter?: string, key?: number) {
   const [reports, setReports] = useState<Report[]>([]);
