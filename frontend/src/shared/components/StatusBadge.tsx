@@ -1,22 +1,13 @@
+import { Tag } from 'antd';
 import type { ReportStatus } from '../types';
-const colors: Record<ReportStatus, string> = {
-  DRAFT: '#9ca3af',
-  SUBMITTED: '#3b82f6',
-  APPROVED: '#22c55e',
-  REJECTED: '#ef4444',
+
+const colorMap: Record<ReportStatus, string> = {
+  DRAFT: 'default',
+  SUBMITTED: 'blue',
+  APPROVED: 'green',
+  REJECTED: 'red',
 };
+
 export function StatusBadge({ status }: { status: ReportStatus }) {
-  return (
-    <span
-      style={{
-        background: colors[status] ?? '#9ca3af',
-        padding: '2px 8px',
-        borderRadius: 4,
-        color: '#fff',
-        fontSize: 12,
-      }}
-    >
-      {status}
-    </span>
-  );
+  return <Tag color={colorMap[status] ?? 'default'}>{status}</Tag>;
 }
