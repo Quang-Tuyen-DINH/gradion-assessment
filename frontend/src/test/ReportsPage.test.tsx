@@ -29,7 +29,7 @@ describe('ReportsPage role-aware rendering', () => {
     expect(screen.getByRole('button', { name: /new report/i })).toBeInTheDocument();
   });
 
-  it('shows "All Reports" heading and User column for admin role', async () => {
+  it('shows "All Reports" heading and User column for admin role', () => {
     localStorage.setItem('token', makeToken('admin'));
     render(<MemoryRouter><ReportsPage /></MemoryRouter>);
     expect(screen.getByText('All Reports')).toBeInTheDocument();
