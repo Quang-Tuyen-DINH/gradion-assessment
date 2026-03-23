@@ -10,10 +10,10 @@ import type { ReportStatus, ExpenseCategory } from '../../../shared/types';
 
 interface ReportItem {
   id: string;
-  amount: number | string;
+  amount: number;
   category: ExpenseCategory;
-  merchantName?: string;
-  date: string;
+  merchantName: string | null;
+  transactionDate: string | null;
 }
 
 interface Report {
