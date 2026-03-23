@@ -13,6 +13,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { ReportsService } from '../reports/reports.service';
 import { FilterReportsDto } from '../reports/dto/filter-reports.dto';
 import { UserRole } from '../common/enums/user-role.enum';
+import { RejectReportDto } from './dto/reject-report.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN)
@@ -36,7 +37,7 @@ export class AdminController {
   }
 
   @Post(':id/reject')
-  reject(@Param('id') id: string, @Body() body: { reason?: string }) {
+  reject(@Param('id') id: string, @Body() _dto: RejectReportDto) {
     // reason is accepted per spec but not persisted (no DB column) — documented in DECISIONS.md
     return this.reports.reject(id);
   }

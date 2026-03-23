@@ -8,5 +8,6 @@ export class UpdateReportDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   description?: string;
 }
