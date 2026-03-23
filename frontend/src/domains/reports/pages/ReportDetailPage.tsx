@@ -6,14 +6,40 @@ import { StatusBadge } from '../../../shared/components/StatusBadge';
 import { LoadingSpinner } from '../../../shared/components/LoadingSpinner';
 import { ItemForm } from '../../items/components/ItemForm';
 import { ItemList } from '../../items/components/ItemList';
+import type { ReportStatus, ExpenseCategory } from '../../../shared/types';
+
+interface ReportItem {
+  id: string;
+  amount: number | string;
+  category: ExpenseCategory;
+  merchantName?: string;
+  date: string;
+}
+
+interface Report {
+  id: string;
+  title: string;
+  description?: string;
+  status: ReportStatus;
+  totalAmount: number | string;
+  items?: ReportItem[];
+}
 
 export function ReportDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [report, setReport] = useState<any>(null);
+  const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
+
+  useEffect(() => {
+    setLoading(true);
+    getReport(id!)
+      .then(setReport)
+      .catch(() => setError('Failed to load report'))
+      .finally(() => setLoading(false));
+  }, [id]);
 
   const reload = useCallback(() => {
     setLoading(true);
@@ -22,8 +48,6 @@ export function ReportDetailPage() {
       .catch(() => setError('Failed to load report'))
       .finally(() => setLoading(false));
   }, [id]);
-
-  useEffect(() => { reload(); }, [reload]);
 
   if (loading) return <LoadingSpinner />;
   if (error || !report) return <p style={{ color: 'red' }}>{error || 'Report not found'}</p>;
@@ -63,10 +87,26 @@ export function ReportDetailPage() {
 
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: 24 }}>
-      <button onClick={() => navigate('/reports')} style={{ marginBottom: 16, background: 'none', border: 'none', cursor: 'pointer', color: '#3b82f6' }}>
+      <button
+        onClick={() => navigate('/reports')}
+        style={{
+          marginBottom: 16,
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          color: '#3b82f6',
+        }}
+      >
         ← Back to reports
       </button>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 8,
+        }}
+      >
         <h2 style={{ margin: 0 }}>{report.title}</h2>
         <StatusBadge status={report.status} />
       </div>
@@ -78,8 +118,14 @@ export function ReportDetailPage() {
       <ItemList
         items={report.items ?? []}
         canEdit={isDraft}
-        onDelete={async (itemId) => { await deleteItem(id!, itemId); reload(); }}
-        onUpdate={async (itemId, data) => { await updateItem(id!, itemId, data); reload(); }}
+        onDelete={async (itemId) => {
+          await deleteItem(id!, itemId);
+          reload();
+        }}
+        onUpdate={async (itemId, data) => {
+          await updateItem(id!, itemId, data);
+          reload();
+        }}
       />
 
       {isDraft && (
@@ -87,7 +133,10 @@ export function ReportDetailPage() {
           <ItemForm reportId={id!} onSaved={reload} />
           <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
             <button onClick={handleSubmit}>Submit Report</button>
-            <button onClick={handleDelete} style={{ color: 'red', background: 'none', border: '1px solid red' }}>
+            <button
+              onClick={handleDelete}
+              style={{ color: 'red', background: 'none', border: '1px solid red' }}
+            >
               Delete Report
             </button>
           </div>
@@ -97,7 +146,15 @@ export function ReportDetailPage() {
       {isRejected && (
         <button
           onClick={handleReturnToDraft}
-          style={{ marginTop: 16, background: '#f59e0b', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 4, cursor: 'pointer' }}
+          style={{
+            marginTop: 16,
+            background: '#f59e0b',
+            color: '#fff',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: 4,
+            cursor: 'pointer',
+          }}
         >
           Return to Draft
         </button>

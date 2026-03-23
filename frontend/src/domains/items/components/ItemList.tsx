@@ -13,7 +13,10 @@ interface Props {
   items: Item[];
   canEdit: boolean;
   onDelete: (itemId: string) => Promise<void>;
-  onUpdate: (itemId: string, data: { amount?: number; category?: string; merchantName?: string }) => Promise<void>;
+  onUpdate: (
+    itemId: string,
+    data: { amount?: number; category?: string; merchantName?: string },
+  ) => Promise<void>;
 }
 
 export function ItemList({ items, canEdit, onDelete, onUpdate }: Props) {
@@ -71,36 +74,55 @@ export function ItemList({ items, canEdit, onDelete, onUpdate }: Props) {
   return (
     <div>
       {actionError && <p style={{ color: 'red', marginBottom: 8 }}>{actionError}</p>}
-      {items.map(item => (
-        <div key={item.id} style={{ border: '1px solid #e5e7eb', borderRadius: 6, padding: 12, marginBottom: 8 }}>
+      {items.map((item) => (
+        <div
+          key={item.id}
+          style={{ border: '1px solid #e5e7eb', borderRadius: 6, padding: 12, marginBottom: 8 }}
+        >
           {editingId === item.id ? (
             <div>
               <input
                 type="number"
                 value={editAmount}
-                onChange={e => setEditAmount(e.target.value)}
+                onChange={(e) => setEditAmount(e.target.value)}
                 style={{ marginRight: 8 }}
               />
-              <select value={editCategory} onChange={e => setEditCategory(e.target.value)}>
+              <select value={editCategory} onChange={(e) => setEditCategory(e.target.value)}>
                 <option value="">No category</option>
-                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
               </select>
               <button onClick={() => saveEdit(item.id)} disabled={saving} style={{ marginLeft: 8 }}>
                 {saving ? 'Saving...' : 'Save'}
               </button>
-              <button onClick={() => setEditingId(null)} style={{ marginLeft: 4 }}>Cancel</button>
+              <button onClick={() => setEditingId(null)} style={{ marginLeft: 4 }}>
+                Cancel
+              </button>
             </div>
           ) : (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <strong>${Number(item.amount).toFixed(2)}</strong>
-                {item.category && <span style={{ marginLeft: 8, color: '#6b7280' }}>{item.category}</span>}
-                {item.merchantName && <span style={{ marginLeft: 8, color: '#6b7280' }}>{item.merchantName}</span>}
-                {item.transactionDate && <span style={{ marginLeft: 8, color: '#9ca3af', fontSize: 12 }}>{item.transactionDate}</span>}
+                {item.category && (
+                  <span style={{ marginLeft: 8, color: '#6b7280' }}>{item.category}</span>
+                )}
+                {item.merchantName && (
+                  <span style={{ marginLeft: 8, color: '#6b7280' }}>{item.merchantName}</span>
+                )}
+                {item.transactionDate && (
+                  <span style={{ marginLeft: 8, color: '#9ca3af', fontSize: 12 }}>
+                    {item.transactionDate}
+                  </span>
+                )}
               </div>
               {canEdit && (
                 <div>
-                  <button onClick={() => startEdit(item)} style={{ marginRight: 4 }}>Edit</button>
+                  <button onClick={() => startEdit(item)} style={{ marginRight: 4 }}>
+                    Edit
+                  </button>
                   <button
                     onClick={() => handleDelete(item.id)}
                     disabled={deletingId === item.id}

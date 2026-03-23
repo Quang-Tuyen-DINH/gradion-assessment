@@ -1,4 +1,12 @@
-import { IsNumber, Min, IsOptional, IsString, MaxLength, IsEnum, IsDateString } from 'class-validator';
+import {
+  IsNumber,
+  Min,
+  IsOptional,
+  IsString,
+  MaxLength,
+  IsEnum,
+  IsDateString,
+} from 'class-validator';
 import { ExpenseCategory } from '../../common/enums/expense-category.enum';
 
 export class UpdateItemDto {

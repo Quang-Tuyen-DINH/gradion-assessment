@@ -5,7 +5,9 @@ import { ExpenseItem } from './entities/expense-item.entity';
 
 @Injectable()
 export class ItemsRepository {
-  constructor(@InjectRepository(ExpenseItem) private repo: Repository<ExpenseItem>) {}
+  constructor(
+    @InjectRepository(ExpenseItem) private repo: Repository<ExpenseItem>,
+  ) {}
 
   async create(data: Partial<ExpenseItem>): Promise<ExpenseItem> {
     const item = this.repo.create(data);

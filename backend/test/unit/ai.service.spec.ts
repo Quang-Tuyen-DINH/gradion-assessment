@@ -34,16 +34,21 @@ describe('AiService', () => {
   });
 
   it('sanitizes merchant name — truncates to 200 chars and prompt contains truncated name', async () => {
-    mockAnthropicCreate.mockResolvedValue({ content: [{ type: 'text', text: 'TRAVEL' }] });
+    mockAnthropicCreate.mockResolvedValue({
+      content: [{ type: 'text', text: 'TRAVEL' }],
+    });
     const longName = 'A'.repeat(300);
     await service.suggestCategory(longName);
-    const calledWith = mockAnthropicCreate.mock.calls[0][0].messages[0].content as string;
+    const calledWith = mockAnthropicCreate.mock.calls[0][0].messages[0]
+      .content as string;
     // The prompt must not contain more than 200 consecutive A's
     expect(calledWith).not.toContain('A'.repeat(201));
   });
 
   it('throws InternalServerErrorException when Anthropic API fails', async () => {
     mockAnthropicCreate.mockRejectedValue(new Error('Network error'));
-    await expect(service.suggestCategory('Test Merchant')).rejects.toThrow(InternalServerErrorException);
+    await expect(service.suggestCategory('Test Merchant')).rejects.toThrow(
+      InternalServerErrorException,
+    );
   });
 });

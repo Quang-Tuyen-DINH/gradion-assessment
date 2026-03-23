@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Report } from '../../reports/entities/report.entity';
 import { ExpenseCategory } from '../../common/enums/expense-category.enum';
 
@@ -31,7 +39,12 @@ export class ExpenseItem {
   @Column({ type: 'enum', enum: ExpenseCategory, nullable: true })
   category: ExpenseCategory | null;
 
-  @Column({ name: 'merchant_name', type: 'varchar', length: 255, nullable: true })
+  @Column({
+    name: 'merchant_name',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   merchantName: string | null;
 
   @Column({ name: 'transaction_date', type: 'date', nullable: true })

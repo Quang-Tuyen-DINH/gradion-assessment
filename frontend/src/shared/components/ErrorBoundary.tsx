@@ -1,9 +1,13 @@
 import React, { Component } from 'react';
 import type { ReactNode } from 'react';
-interface State { hasError: boolean }
+interface State {
+  hasError: boolean;
+}
 export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
   state = { hasError: false };
-  static getDerivedStateFromError() { return { hasError: true }; }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error('ErrorBoundary caught:', error, info.componentStack);
   }

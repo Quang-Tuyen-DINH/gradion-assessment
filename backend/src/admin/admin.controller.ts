@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Param, Query, UseGuards, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Query,
+  UseGuards,
+  Body,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -13,13 +21,19 @@ export class AdminController {
   constructor(private readonly reports: ReportsService) {}
 
   @Get()
-  findAll(@Query() q: FilterReportsDto) { return this.reports.findAllAdmin(q.status); }
+  findAll(@Query() q: FilterReportsDto) {
+    return this.reports.findAllAdmin(q.status);
+  }
 
   @Get(':id')
-  findOne(@Param('id') id: string) { return this.reports.findOneAdmin(id); }
+  findOne(@Param('id') id: string) {
+    return this.reports.findOneAdmin(id);
+  }
 
   @Post(':id/approve')
-  approve(@Param('id') id: string) { return this.reports.approve(id); }
+  approve(@Param('id') id: string) {
+    return this.reports.approve(id);
+  }
 
   @Post(':id/reject')
   reject(@Param('id') id: string, @Body() body: { reason?: string }) {

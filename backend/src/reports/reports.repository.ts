@@ -26,7 +26,9 @@ export class ReportsRepository {
   }
 
   findAll(status?: ReportStatus): Promise<Report[]> {
-    const qb = this.repo.createQueryBuilder('r').leftJoinAndSelect('r.items', 'items');
+    const qb = this.repo
+      .createQueryBuilder('r')
+      .leftJoinAndSelect('r.items', 'items');
     if (status) qb.where('r.status = :status', { status });
     return qb.getMany();
   }

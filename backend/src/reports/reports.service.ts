@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, ForbiddenException, UnprocessableEntityException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  UnprocessableEntityException,
+  BadRequestException,
+} from '@nestjs/common';
 import { ReportsRepository } from './reports.repository';
 import { ReportStatus } from '../common/enums/report-status.enum';
 import { CreateReportDto } from './dto/create-report.dto';
@@ -23,7 +29,10 @@ export class ReportsService {
   }
 
   private computeTotalAmount(report: Report): number {
-    return (report.items ?? []).reduce((sum, item) => sum + Number(item.amount), 0);
+    return (report.items ?? []).reduce(
+      (sum, item) => sum + Number(item.amount),
+      0,
+    );
   }
 
   private toResponse(report: Report) {
@@ -51,17 +60,25 @@ export class ReportsService {
   }
 
   async create(userId: string, dto: CreateReportDto) {
-    const report = await this.repo.create({ userId, ...dto, status: ReportStatus.DRAFT });
+    const report = await this.repo.create({
+      userId,
+      ...dto,
+      status: ReportStatus.DRAFT,
+    });
     return this.toResponse(report);
   }
 
   async update(id: string, userId: string, dto: UpdateReportDto) {
     const report = await this.findAndCheckOwner(id, userId);
     if (report.status !== ReportStatus.DRAFT) {
-      throw new UnprocessableEntityException(`Cannot edit a report with status ${report.status}`);
+      throw new UnprocessableEntityException(
+        `Cannot edit a report with status ${report.status}`,
+      );
     }
     if (dto.title === undefined && dto.description === undefined) {
-      throw new BadRequestException('At least one field (title or description) must be provided');
+      throw new BadRequestException(
+        'At least one field (title or description) must be provided',
+      );
     }
     Object.assign(report, dto);
     const saved = await this.repo.save(report);
@@ -71,7 +88,9 @@ export class ReportsService {
   async remove(id: string, userId: string): Promise<void> {
     const report = await this.findAndCheckOwner(id, userId);
     if (report.status !== ReportStatus.DRAFT) {
-      throw new UnprocessableEntityException(`Cannot delete a report with status ${report.status}`);
+      throw new UnprocessableEntityException(
+        `Cannot delete a report with status ${report.status}`,
+      );
     }
     await this.repo.delete(id);
   }
@@ -83,7 +102,9 @@ export class ReportsService {
   async submit(id: string, userId: string) {
     const report = await this.findAndCheckOwner(id, userId);
     if (report.status !== ReportStatus.DRAFT) {
-      throw new UnprocessableEntityException(`Cannot submit a report with status ${report.status}`);
+      throw new UnprocessableEntityException(
+        `Cannot submit a report with status ${report.status}`,
+      );
     }
     report.status = ReportStatus.SUBMITTED;
     const saved = await this.repo.save(report);
@@ -93,7 +114,9 @@ export class ReportsService {
   async returnToDraft(id: string, userId: string) {
     const report = await this.findAndCheckOwner(id, userId);
     if (report.status !== ReportStatus.REJECTED) {
-      throw new UnprocessableEntityException(`Cannot return to draft a report with status ${report.status}`);
+      throw new UnprocessableEntityException(
+        `Cannot return to draft a report with status ${report.status}`,
+      );
     }
     report.status = ReportStatus.DRAFT;
     const saved = await this.repo.save(report);
@@ -103,7 +126,9 @@ export class ReportsService {
   async approve(id: string) {
     const report = await this.findOrFail(id);
     if (report.status !== ReportStatus.SUBMITTED) {
-      throw new UnprocessableEntityException(`Cannot approve a report with status ${report.status}`);
+      throw new UnprocessableEntityException(
+        `Cannot approve a report with status ${report.status}`,
+      );
     }
     report.status = ReportStatus.APPROVED;
     const saved = await this.repo.save(report);
@@ -113,7 +138,9 @@ export class ReportsService {
   async reject(id: string) {
     const report = await this.findOrFail(id);
     if (report.status !== ReportStatus.SUBMITTED) {
-      throw new UnprocessableEntityException(`Cannot reject a report with status ${report.status}`);
+      throw new UnprocessableEntityException(
+        `Cannot reject a report with status ${report.status}`,
+      );
     }
     report.status = ReportStatus.REJECTED;
     const saved = await this.repo.save(report);

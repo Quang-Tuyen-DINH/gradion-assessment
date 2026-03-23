@@ -27,26 +27,41 @@ export function ReportsPage() {
 
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: 24 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 16,
+        }}
+      >
         <h2 style={{ margin: 0 }}>My Reports</h2>
         <button onClick={handleCreate}>+ New Report</button>
       </div>
       <select
         value={filter}
-        onChange={e => setFilter(e.target.value as ReportStatus | '')}
+        onChange={(e) => setFilter(e.target.value as ReportStatus | '')}
         style={{ marginBottom: 16 }}
       >
         <option value="">All statuses</option>
-        {(['DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED'] as ReportStatus[]).map(s => (
-          <option key={s} value={s}>{s}</option>
+        {(['DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED'] as ReportStatus[]).map((s) => (
+          <option key={s} value={s}>
+            {s}
+          </option>
         ))}
       </select>
       {reports.length === 0 && <p style={{ color: '#9ca3af' }}>No reports found.</p>}
-      {reports.map(r => (
+      {reports.map((r) => (
         <div
           key={r.id}
           onClick={() => navigate(`/reports/${r.id}`)}
-          style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 16, marginBottom: 8, cursor: 'pointer' }}
+          style={{
+            border: '1px solid #e5e7eb',
+            borderRadius: 8,
+            padding: 16,
+            marginBottom: 8,
+            cursor: 'pointer',
+          }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <strong>{r.title}</strong>

@@ -13,8 +13,8 @@ export function useSignup() {
     try {
       await signup(email, password);
       navigate('/login');
-    } catch (err: any) {
-      const status = err?.response?.status;
+    } catch (err) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
       if (status === 409) {
         setError('Email already in use');
       } else {

@@ -13,19 +13,29 @@ describe('Expense Report — E2E', () => {
   let reportId: string;
 
   beforeAll(async () => {
-    const module = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    const module = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
     app = module.createNestApplication();
     app.setGlobalPrefix('api/v1');
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
     await app.init();
 
     // Create admin user for tests (idempotent)
     const dataSource = app.get(DataSource);
     const userRepo = dataSource.getRepository('users');
-    const adminExists = await userRepo.findOneBy({ email: 'admin@gradion.com' });
+    const adminExists = await userRepo.findOneBy({
+      email: 'admin@gradion.com',
+    });
     if (!adminExists) {
       const hash = await bcrypt.hash('admin1234', 10);
-      await userRepo.save({ email: 'admin@gradion.com', passwordHash: hash, role: UserRole.ADMIN });
+      await userRepo.save({
+        email: 'admin@gradion.com',
+        passwordHash: hash,
+        role: UserRole.ADMIN,
+      });
     }
   });
 
@@ -48,13 +58,12 @@ describe('Expense Report — E2E', () => {
   });
 
   it('GET /reports — returns 401 without token', async () => {
-    await request(app.getHttpServer())
-      .get('/api/v1/reports')
-      .expect(401);
+    await request(app.getHttpServer()).get('/api/v1/reports').expect(401);
   });
 
   it('POST /reports — creates DRAFT report', async () => {
-    if (!userToken) throw new Error('userToken not set — check POST /auth/login test');
+    if (!userToken)
+      throw new Error('userToken not set — check POST /auth/login test');
     const res = await request(app.getHttpServer())
       .post('/api/v1/reports')
       .set('Authorization', `Bearer ${userToken}`)
@@ -66,11 +75,12 @@ describe('Expense Report — E2E', () => {
   });
 
   it('POST /reports/:id/items — adds item to DRAFT report', async () => {
-    if (!reportId) throw new Error('reportId not set — check POST /reports test');
+    if (!reportId)
+      throw new Error('reportId not set — check POST /reports test');
     const res = await request(app.getHttpServer())
       .post(`/api/v1/reports/${reportId}/items`)
       .set('Authorization', `Bearer ${userToken}`)
-      .send({ amount: 150.00, category: 'TRAVEL', merchantName: 'Air France' })
+      .send({ amount: 150.0, category: 'TRAVEL', merchantName: 'Air France' })
       .expect(201);
     expect(res.body.reportId).toBe(reportId);
     expect(Number(res.body.amount)).toBe(150);
@@ -112,7 +122,8 @@ describe('Expense Report — E2E', () => {
   });
 
   it('POST /admin/reports/:id/approve — SUBMITTED → APPROVED', async () => {
-    if (!adminToken) throw new Error('adminToken not set — check Admin login test');
+    if (!adminToken)
+      throw new Error('adminToken not set — check Admin login test');
     const res = await request(app.getHttpServer())
       .post(`/api/v1/admin/reports/${reportId}/approve`)
       .set('Authorization', `Bearer ${adminToken}`)
@@ -124,33 +135,44 @@ describe('Expense Report — E2E', () => {
   it('Full rejection path: DRAFT → SUBMITTED → REJECTED → DRAFT → SUBMITTED → APPROVED', async () => {
     // Create new report
     const r = await request(app.getHttpServer())
-      .post('/api/v1/reports').set('Authorization', `Bearer ${userToken}`)
-      .send({ title: 'Rejection test' }).expect(201);
+      .post('/api/v1/reports')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ title: 'Rejection test' })
+      .expect(201);
     const rId = r.body.id;
 
     await request(app.getHttpServer())
       .post(`/api/v1/reports/${rId}/items`)
       .set('Authorization', `Bearer ${userToken}`)
-      .send({ amount: 25.00, category: 'MEALS' })
+      .send({ amount: 25.0, category: 'MEALS' })
       .expect(201);
 
     await request(app.getHttpServer())
-      .post(`/api/v1/reports/${rId}/submit`).set('Authorization', `Bearer ${userToken}`).expect(201);
+      .post(`/api/v1/reports/${rId}/submit`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .expect(201);
 
     const rejected = await request(app.getHttpServer())
-      .post(`/api/v1/admin/reports/${rId}/reject`).set('Authorization', `Bearer ${adminToken}`).expect(201);
+      .post(`/api/v1/admin/reports/${rId}/reject`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(201);
     expect(rejected.body.status).toBe('REJECTED');
 
     const drafted = await request(app.getHttpServer())
-      .post(`/api/v1/reports/${rId}/return-to-draft`).set('Authorization', `Bearer ${userToken}`)
+      .post(`/api/v1/reports/${rId}/return-to-draft`)
+      .set('Authorization', `Bearer ${userToken}`)
       .expect(201);
     expect(drafted.body.status).toBe('DRAFT');
 
     await request(app.getHttpServer())
-      .post(`/api/v1/reports/${rId}/submit`).set('Authorization', `Bearer ${userToken}`).expect(201);
+      .post(`/api/v1/reports/${rId}/submit`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .expect(201);
 
     const approved = await request(app.getHttpServer())
-      .post(`/api/v1/admin/reports/${rId}/approve`).set('Authorization', `Bearer ${adminToken}`).expect(201);
+      .post(`/api/v1/admin/reports/${rId}/approve`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(201);
     expect(approved.body.status).toBe('APPROVED');
   });
 });

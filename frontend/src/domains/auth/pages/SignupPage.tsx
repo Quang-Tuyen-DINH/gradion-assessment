@@ -17,20 +17,22 @@ export function SignupPage() {
         placeholder="Email"
         type="email"
         value={email}
-        onChange={e => setEmail(e.target.value)}
+        onChange={(e) => setEmail(e.target.value)}
         style={{ display: 'block', width: '100%', marginBottom: 8 }}
       />
       <input
         placeholder="Password (min 8 characters)"
         type="password"
         value={password}
-        onChange={e => setPassword(e.target.value)}
+        onChange={(e) => setPassword(e.target.value)}
         style={{ display: 'block', width: '100%', marginBottom: 8 }}
       />
       <button onClick={() => submit(email, password)} disabled={loading}>
         Sign Up
       </button>
-      <p><Link to="/login">Already have an account? Login</Link></p>
+      <p>
+        <Link to="/login">Already have an account? Login</Link>
+      </p>
     </div>
   );
 }

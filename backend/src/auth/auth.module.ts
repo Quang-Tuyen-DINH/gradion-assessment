@@ -15,10 +15,13 @@ import { UsersModule } from '../users/users.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
         const secret = config.get<string>('JWT_SECRET');
-        if (!secret) throw new Error('JWT_SECRET environment variable is not set');
+        if (!secret)
+          throw new Error('JWT_SECRET environment variable is not set');
         return {
           secret,
-          signOptions: { expiresIn: (config.get<string>('JWT_EXPIRES_IN') ?? '7d') as any },
+          signOptions: {
+            expiresIn: (config.get<string>('JWT_EXPIRES_IN') ?? '7d') as any,
+          },
         };
       },
     }),

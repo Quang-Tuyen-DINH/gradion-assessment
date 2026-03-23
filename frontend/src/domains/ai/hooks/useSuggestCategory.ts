@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { suggestCategory } from '../api/ai';
 
-export function useSuggestCategory(debouncedMerchantName: string, setCategory: (c: string) => void) {
+export function useSuggestCategory(
+  debouncedMerchantName: string,
+  setCategory: (c: string) => void,
+) {
   const [loading, setLoading] = useState(false);
   const setCategoryRef = useRef(setCategory);
   setCategoryRef.current = setCategory;
@@ -11,10 +14,18 @@ export function useSuggestCategory(debouncedMerchantName: string, setCategory: (
     let cancelled = false;
     setLoading(true);
     suggestCategory(debouncedMerchantName)
-      .then(({ category }) => { if (!cancelled) setCategoryRef.current(category); })
-      .catch(() => { /* silently ignore AI failures */ })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+      .then(({ category }) => {
+        if (!cancelled) setCategoryRef.current(category);
+      })
+      .catch(() => {
+        /* silently ignore AI failures */
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [debouncedMerchantName]);
 
   const suggest = async () => {

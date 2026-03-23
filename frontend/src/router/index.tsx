@@ -12,12 +12,62 @@ export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<ErrorBoundary><LoginPage /></ErrorBoundary>} />
-        <Route path="/signup" element={<ErrorBoundary><SignupPage /></ErrorBoundary>} />
-        <Route path="/reports" element={<ProtectedRoute><ErrorBoundary><ReportsPage /></ErrorBoundary></ProtectedRoute>} />
-        <Route path="/reports/:id" element={<ProtectedRoute><ErrorBoundary><ReportDetailPage /></ErrorBoundary></ProtectedRoute>} />
-        <Route path="/admin/reports" element={<ProtectedRoute><ErrorBoundary><AdminReportsPage /></ErrorBoundary></ProtectedRoute>} />
-        <Route path="/admin/reports/:id" element={<ProtectedRoute><ErrorBoundary><AdminReportDetailPage /></ErrorBoundary></ProtectedRoute>} />
+        <Route
+          path="/login"
+          element={
+            <ErrorBoundary>
+              <LoginPage />
+            </ErrorBoundary>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <ErrorBoundary>
+              <SignupPage />
+            </ErrorBoundary>
+          }
+        />
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute>
+              <ErrorBoundary>
+                <ReportsPage />
+              </ErrorBoundary>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports/:id"
+          element={
+            <ProtectedRoute>
+              <ErrorBoundary>
+                <ReportDetailPage />
+              </ErrorBoundary>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/reports"
+          element={
+            <ProtectedRoute>
+              <ErrorBoundary>
+                <AdminReportsPage />
+              </ErrorBoundary>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/reports/:id"
+          element={
+            <ProtectedRoute>
+              <ErrorBoundary>
+                <AdminReportDetailPage />
+              </ErrorBoundary>
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

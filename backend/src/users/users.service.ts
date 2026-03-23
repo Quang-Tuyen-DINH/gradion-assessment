@@ -16,7 +16,11 @@ export class UsersService {
     return this.repo.findOneBy({ id });
   }
 
-  create(email: string, passwordHash: string, role: UserRole = UserRole.USER): Promise<User> {
+  create(
+    email: string,
+    passwordHash: string,
+    role: UserRole = UserRole.USER,
+  ): Promise<User> {
     const user = this.repo.create({ email, passwordHash, role });
     return this.repo.save(user);
   }

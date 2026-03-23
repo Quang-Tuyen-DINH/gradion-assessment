@@ -57,14 +57,14 @@ export function ItemForm({ reportId, onSaved }: Props) {
         min="0.01"
         step="0.01"
         value={amount}
-        onChange={e => setAmount(e.target.value)}
+        onChange={(e) => setAmount(e.target.value)}
         style={{ display: 'block', width: '100%', marginBottom: 8 }}
       />
       <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
         <input
           placeholder="Merchant name"
           value={merchantName}
-          onChange={e => setMerchantName(e.target.value)}
+          onChange={(e) => setMerchantName(e.target.value)}
           style={{ flex: 1 }}
         />
         <button onClick={suggest} disabled={aiLoading || !merchantName}>
@@ -74,16 +74,20 @@ export function ItemForm({ reportId, onSaved }: Props) {
       {aiLoading && <LoadingSpinner />}
       <select
         value={category}
-        onChange={e => setCategory(e.target.value)}
+        onChange={(e) => setCategory(e.target.value)}
         style={{ display: 'block', width: '100%', margin: '0 0 8px' }}
       >
         <option value="">Select category</option>
-        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+        {CATEGORIES.map((c) => (
+          <option key={c} value={c}>
+            {c}
+          </option>
+        ))}
       </select>
       <input
         type="date"
         value={transactionDate}
-        onChange={e => setTransactionDate(e.target.value)}
+        onChange={(e) => setTransactionDate(e.target.value)}
         style={{ display: 'block', width: '100%', marginBottom: 8 }}
       />
       <button onClick={handleSubmit} disabled={saving}>

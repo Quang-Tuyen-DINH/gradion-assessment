@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { ItemsRepository } from './items.repository';
 import { ReportsService } from '../reports/reports.service';
 import { ReportStatus } from '../common/enums/report-status.enum';
@@ -7,12 +11,17 @@ import { UpdateItemDto } from './dto/update-item.dto';
 
 @Injectable()
 export class ItemsService {
-  constructor(private repo: ItemsRepository, private reports: ReportsService) {}
+  constructor(
+    private repo: ItemsRepository,
+    private reports: ReportsService,
+  ) {}
 
   private async guardDraft(reportId: string, userId: string) {
     const report = await this.reports.findAndCheckOwnerRaw(reportId, userId);
     if (report.status !== ReportStatus.DRAFT) {
-      throw new UnprocessableEntityException(`Cannot modify items on a report with status ${report.status}`);
+      throw new UnprocessableEntityException(
+        `Cannot modify items on a report with status ${report.status}`,
+      );
     }
     return report;
   }
@@ -22,7 +31,12 @@ export class ItemsService {
     return this.repo.create({ reportId, ...dto });
   }
 
-  async update(reportId: string, itemId: string, userId: string, dto: UpdateItemDto) {
+  async update(
+    reportId: string,
+    itemId: string,
+    userId: string,
+    dto: UpdateItemDto,
+  ) {
     await this.guardDraft(reportId, userId);
     if (
       dto.amount === undefined &&
@@ -38,7 +52,11 @@ export class ItemsService {
     return this.repo.save(item);
   }
 
-  async remove(reportId: string, itemId: string, userId: string): Promise<void> {
+  async remove(
+    reportId: string,
+    itemId: string,
+    userId: string,
+  ): Promise<void> {
     await this.guardDraft(reportId, userId);
     await this.repo.delete(itemId, reportId);
   }
