@@ -1,123 +1,99 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Button, Descriptions, Space, Alert, Popconfirm, Typography } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import { getReport, submitReport, returnToDraft, deleteReport } from '../api/reports';
+import { getAdminReport, approveReport, rejectReport } from '../../admin/api/admin';
 import { updateItem, deleteItem } from '../../items/api/items';
 import { StatusBadge } from '../../../shared/components/StatusBadge';
 import { LoadingSpinner } from '../../../shared/components/LoadingSpinner';
 import { ItemForm } from '../../items/components/ItemForm';
 import { ItemList } from '../../items/components/ItemList';
-import type { ReportStatus, ExpenseCategory } from '../../../shared/types';
-
-interface ReportItem {
-  id: string;
-  amount: number;
-  category: ExpenseCategory;
-  merchantName: string | null;
-  transactionDate: string | null;
-}
-
-interface Report {
-  id: string;
-  title: string;
-  description?: string;
-  status: ReportStatus;
-  totalAmount: number | string;
-  items?: ReportItem[];
-}
+import { isAdmin } from '../../../shared/utils/auth';
 
 export function ReportDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [report, setReport] = useState<Report | null>(null);
+  const admin = isAdmin();
+
+  const [report, setReport] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
 
-  useEffect(() => {
-    setLoading(true);
-    getReport(id!)
-      .then(setReport)
-      .catch(() => setError('Failed to load report'))
-      .finally(() => setLoading(false));
-  }, [id]);
-
   const reload = useCallback(() => {
     setLoading(true);
-    getReport(id!)
+    const fetch = admin ? getAdminReport(id!) : getReport(id!);
+    fetch
       .then(setReport)
       .catch(() => setError('Failed to load report'))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, admin]);
+
+  useEffect(() => {
+    reload();
+  }, [reload]);
 
   if (loading) return <LoadingSpinner />;
-  if (error || !report) return <p style={{ color: 'red' }}>{error || 'Report not found'}</p>;
+  if (error || !report) return <Alert type="error" message={error || 'Report not found'} />;
 
   const isDraft = report.status === 'DRAFT';
   const isRejected = report.status === 'REJECTED';
+  const isSubmitted = report.status === 'SUBMITTED';
 
-  const handleSubmit = async () => {
+  const withError = async (fn: () => Promise<void>, msg: string) => {
     setActionError('');
     try {
-      await submitReport(id!);
+      await fn();
       reload();
     } catch {
-      setActionError('Failed to submit report');
-    }
-  };
-
-  const handleReturnToDraft = async () => {
-    setActionError('');
-    try {
-      await returnToDraft(id!);
-      reload();
-    } catch {
-      setActionError('Failed to return to draft');
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!confirm('Delete this report?')) return;
-    try {
-      await deleteReport(id!);
-      navigate('/reports');
-    } catch {
-      setActionError('Failed to delete report');
+      setActionError(msg);
     }
   };
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: 24 }}>
-      <button
+    <div>
+      <Button
+        icon={<ArrowLeftOutlined />}
+        type="link"
         onClick={() => navigate('/reports')}
-        style={{
-          marginBottom: 16,
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          color: '#3b82f6',
-        }}
+        style={{ marginBottom: 16, paddingLeft: 0 }}
       >
-        ← Back to reports
-      </button>
+        Back to reports
+      </Button>
+
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: 8,
+          marginBottom: 16,
         }}
       >
-        <h2 style={{ margin: 0 }}>{report.title}</h2>
+        <Typography.Title level={3} style={{ margin: 0 }}>
+          {report.title}
+        </Typography.Title>
         <StatusBadge status={report.status} />
       </div>
-      {report.description && <p style={{ color: '#6b7280' }}>{report.description}</p>}
-      <p style={{ fontWeight: 600 }}>Total: ${Number(report.totalAmount).toFixed(2)}</p>
 
-      {actionError && <p style={{ color: 'red' }}>{actionError}</p>}
+      {actionError && <Alert type="error" message={actionError} style={{ marginBottom: 16 }} />}
 
+      <Descriptions bordered size="small" style={{ marginBottom: 24 }}>
+        {report.description && (
+          <Descriptions.Item label="Description" span={3}>
+            {report.description}
+          </Descriptions.Item>
+        )}
+        <Descriptions.Item label="Total">${Number(report.totalAmount).toFixed(2)}</Descriptions.Item>
+        {admin && report.user && (
+          <Descriptions.Item label="Submitted by">{report.user.email}</Descriptions.Item>
+        )}
+      </Descriptions>
+
+      <Typography.Title level={5}>Items</Typography.Title>
       <ItemList
         items={report.items ?? []}
-        canEdit={isDraft}
+        canEdit={isDraft && !admin}
         onDelete={async (itemId) => {
           await deleteItem(id!, itemId);
           reload();
@@ -128,36 +104,58 @@ export function ReportDetailPage() {
         }}
       />
 
-      {isDraft && (
+      {isDraft && !admin && (
         <>
           <ItemForm reportId={id!} onSaved={reload} />
-          <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
-            <button onClick={handleSubmit}>Submit Report</button>
-            <button
-              onClick={handleDelete}
-              style={{ color: 'red', background: 'none', border: '1px solid red' }}
+          <Space style={{ marginTop: 16 }}>
+            <Button
+              type="primary"
+              onClick={() => withError(() => submitReport(id!), 'Failed to submit')}
             >
-              Delete Report
-            </button>
-          </div>
+              Submit Report
+            </Button>
+            <Popconfirm
+              title="Delete this report?"
+              onConfirm={() =>
+                withError(
+                  async () => {
+                    await deleteReport(id!);
+                    navigate('/reports');
+                  },
+                  'Failed to delete',
+                )
+              }
+            >
+              <Button danger>Delete Report</Button>
+            </Popconfirm>
+          </Space>
         </>
       )}
 
-      {isRejected && (
-        <button
-          onClick={handleReturnToDraft}
-          style={{
-            marginTop: 16,
-            background: '#f59e0b',
-            color: '#fff',
-            border: 'none',
-            padding: '8px 16px',
-            borderRadius: 4,
-            cursor: 'pointer',
-          }}
+      {isRejected && !admin && (
+        <Button
+          style={{ marginTop: 16 }}
+          onClick={() => withError(() => returnToDraft(id!), 'Failed to return to draft')}
         >
           Return to Draft
-        </button>
+        </Button>
+      )}
+
+      {isSubmitted && admin && (
+        <Space style={{ marginTop: 16 }}>
+          <Popconfirm
+            title="Approve this report?"
+            onConfirm={() => withError(() => approveReport(id!), 'Failed to approve')}
+          >
+            <Button type="primary">Approve</Button>
+          </Popconfirm>
+          <Popconfirm
+            title="Reject this report?"
+            onConfirm={() => withError(() => rejectReport(id!), 'Failed to reject')}
+          >
+            <Button danger>Reject</Button>
+          </Popconfirm>
+        </Space>
       )}
     </div>
   );
