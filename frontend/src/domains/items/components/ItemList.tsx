@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { Table, Button, InputNumber, Select, Popconfirm, Space, Form } from 'antd';
 import { CATEGORIES } from '../../../shared/constants';
 
 interface Item {
   id: string;
   amount: number;
+  currency: string | null;
   category: string | null;
   merchantName: string | null;
   transactionDate: string | null;
@@ -21,121 +23,108 @@ interface Props {
 
 export function ItemList({ items, canEdit, onDelete, onUpdate }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editAmount, setEditAmount] = useState('');
-  const [editCategory, setEditCategory] = useState('');
-  const [actionError, setActionError] = useState('');
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [editForm] = Form.useForm();
 
   const startEdit = (item: Item) => {
     setEditingId(item.id);
-    setEditAmount(String(item.amount));
-    setEditCategory(item.category ?? '');
-    setActionError('');
+    editForm.setFieldsValue({ amount: item.amount, category: item.category ?? '' });
   };
 
-  const saveEdit = async (itemId: string) => {
-    const parsed = Number(editAmount);
-    if (!editAmount || isNaN(parsed) || parsed <= 0) {
-      setActionError('Amount must be a number greater than 0');
-      return;
-    }
-    setSaving(true);
-    setActionError('');
-    try {
-      await onUpdate(itemId, {
-        amount: parsed,
-        category: editCategory || undefined,
-      });
-      setEditingId(null);
-    } catch {
-      setActionError('Failed to update item');
-    } finally {
-      setSaving(false);
-    }
+  const saveEdit = async (item: Item) => {
+    const values = await editForm.validateFields();
+    await onUpdate(item.id, { amount: values.amount, category: values.category || undefined });
+    setEditingId(null);
   };
 
-  const handleDelete = async (itemId: string) => {
-    setDeletingId(itemId);
-    setActionError('');
-    try {
-      await onDelete(itemId);
-    } catch {
-      setActionError('Failed to delete item');
-    } finally {
-      setDeletingId(null);
-    }
-  };
-
-  if (items.length === 0) {
-    return <p style={{ color: '#9ca3af' }}>No items yet.</p>;
-  }
+  const columns = [
+    {
+      title: 'Amount',
+      key: 'amount',
+      render: (_: unknown, record: Item) =>
+        editingId === record.id ? (
+          <Form.Item
+            name="amount"
+            rules={[{ type: 'number' as const, min: 0.01, max: 1_000_000 }]}
+            style={{ margin: 0 }}
+          >
+            <InputNumber prefix="$" min={0.01} max={1_000_000} step={0.01} />
+          </Form.Item>
+        ) : (
+          `$${Number(record.amount).toFixed(2)}`
+        ),
+    },
+    {
+      title: 'Category',
+      key: 'category',
+      render: (_: unknown, record: Item) =>
+        editingId === record.id ? (
+          <Form.Item name="category" style={{ margin: 0 }}>
+            <Select allowClear style={{ minWidth: 160 }}>
+              {CATEGORIES.map((c) => (
+                <Select.Option key={c} value={c}>
+                  {c}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+        ) : (
+          record.category ?? '—'
+        ),
+    },
+    {
+      title: 'Merchant',
+      dataIndex: 'merchantName',
+      key: 'merchantName',
+      render: (v: string | null) => v ?? '—',
+    },
+    {
+      title: 'Date',
+      dataIndex: 'transactionDate',
+      key: 'transactionDate',
+      render: (v: string | null) => v ?? '—',
+    },
+    ...(canEdit
+      ? [
+          {
+            title: 'Actions',
+            key: 'actions',
+            render: (_: unknown, record: Item) =>
+              editingId === record.id ? (
+                <Space>
+                  <Button type="link" onClick={() => saveEdit(record)}>
+                    Save
+                  </Button>
+                  <Button type="link" onClick={() => setEditingId(null)}>
+                    Cancel
+                  </Button>
+                </Space>
+              ) : (
+                <Space>
+                  <Button type="link" onClick={() => startEdit(record)}>
+                    Edit
+                  </Button>
+                  <Popconfirm title="Delete this item?" onConfirm={() => onDelete(record.id)}>
+                    <Button type="link" danger>
+                      Delete
+                    </Button>
+                  </Popconfirm>
+                </Space>
+              ),
+          },
+        ]
+      : []),
+  ];
 
   return (
-    <div>
-      {actionError && <p style={{ color: 'red', marginBottom: 8 }}>{actionError}</p>}
-      {items.map((item) => (
-        <div
-          key={item.id}
-          style={{ border: '1px solid #e5e7eb', borderRadius: 6, padding: 12, marginBottom: 8 }}
-        >
-          {editingId === item.id ? (
-            <div>
-              <input
-                type="number"
-                value={editAmount}
-                onChange={(e) => setEditAmount(e.target.value)}
-                style={{ marginRight: 8 }}
-              />
-              <select value={editCategory} onChange={(e) => setEditCategory(e.target.value)}>
-                <option value="">No category</option>
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-              <button onClick={() => saveEdit(item.id)} disabled={saving} style={{ marginLeft: 8 }}>
-                {saving ? 'Saving...' : 'Save'}
-              </button>
-              <button onClick={() => setEditingId(null)} style={{ marginLeft: 4 }}>
-                Cancel
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <strong>${Number(item.amount).toFixed(2)}</strong>
-                {item.category && (
-                  <span style={{ marginLeft: 8, color: '#6b7280' }}>{item.category}</span>
-                )}
-                {item.merchantName && (
-                  <span style={{ marginLeft: 8, color: '#6b7280' }}>{item.merchantName}</span>
-                )}
-                {item.transactionDate && (
-                  <span style={{ marginLeft: 8, color: '#9ca3af', fontSize: 12 }}>
-                    {item.transactionDate}
-                  </span>
-                )}
-              </div>
-              {canEdit && (
-                <div>
-                  <button onClick={() => startEdit(item)} style={{ marginRight: 4 }}>
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    disabled={deletingId === item.id}
-                    style={{ color: 'red' }}
-                  >
-                    {deletingId === item.id ? '...' : 'Delete'}
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
+    <Form form={editForm}>
+      <Table
+        rowKey="id"
+        columns={columns}
+        dataSource={items}
+        pagination={false}
+        locale={{ emptyText: 'No items yet.' }}
+        size="small"
+      />
+    </Form>
   );
 }
