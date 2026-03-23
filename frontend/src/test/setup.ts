@@ -1,6 +1,28 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
+// Ant Design requires matchMedia — polyfill for jsdom
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }),
+});
+
+// Ant Design Menu and other components use ResizeObserver — polyfill for jsdom
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
 // Mock axios client globally
 vi.mock('../shared/api/client', () => ({
   default: {
